@@ -1,0 +1,27 @@
+{
+  "name": "node-boiler-assist",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./bin/index.js",
+  "bin": {
+    "assist": "bin/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Viraj",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "inquirer": "^10.1.2",
+    "yargs": "^17.7.2"
+  },
+  "description": "This project is a cli tool to create a node project"
+}

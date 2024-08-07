@@ -1,0 +1,21 @@
+async function connectMongo() {
+  const username = 'your_username';
+  const password = 'your_password';
+  const clusterName = 'your_clusterName';
+  const dbName = 'dbName';
+  const db = 'db_name'
+
+  const uri = `mongodb+srv://${username}:${password}@${clusterName}.mongodb.net/${dbname}?retryWrites=true&w=majority&appName=${db}`;
+  
+  try {
+    await mongoose.connect(uri)
+    .then(() => {
+      console.log('Connected to MongoDB');
+    });
+  } catch (err) {
+    console.log("There was an error")
+    console.log(err)
+  }
+}
+
+connectMongo()

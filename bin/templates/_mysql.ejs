@@ -1,0 +1,11 @@
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'your_username',
+  password: 'your_password',
+  database: 'your_database'
+});
+
+// close the connection
+<!-- process.on('exit', () => {
+  pool.end();
+}); -->
