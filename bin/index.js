@@ -129,6 +129,9 @@ argv.command({
     }
     console.log("The package.json file has been created");
     jsonFile = JSON.parse(fs.readFileSync(path.join(cwd, "./package.json")))
+    jsonFile.type = "module";
+    jsonFile.scripts.start = `node ${jsonFile.main}`
+    
     setup(jsonFile);
 
     createFile('', ".env", "");

@@ -1,5 +1,5 @@
 {
-  "name": "node-boiler-assist",
+  "name": "boiler-assist",
   "version": "0.0.1",
   "type": "module",
   "main": "./bin/index.js",
@@ -12,7 +12,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "node",
+    "cli",
+    "boilerplate",
+    "database"
+  ],
   "author": "Viraj",
   "license": "ISC",
   "dependencies": {
@@ -23,5 +28,6 @@
     "inquirer": "^10.1.2",
     "yargs": "^17.7.2"
   },
-  "description": "This project is a cli tool to create a node project"
+  "description": "This project is a cli tool to create a node project",
+  "devDependencies": {}
 }
