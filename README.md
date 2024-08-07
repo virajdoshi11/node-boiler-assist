@@ -31,4 +31,4 @@ assist create-node-app express dotenv -y
 
 The above command will only install the packages `express` and `dotenv`.
 
-The `-y` flag is used to generate a default `package.json`. Remove the `-y` flag to create a custom `ackage.json` file (internally uses `npm init`).
+The `-y` flag is used to generate a default `package.json`. Remove the `-y` flag to create a custom `package.json` file (internally uses `npm init`).
