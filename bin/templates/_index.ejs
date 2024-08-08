@@ -1,5 +1,7 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
+import path from 'path';
 <% if (db == "MongoDB (mongoose)") { %>
 import mongoose from 'mongoose';
 <% } else if(db == "Firebase") { %>
@@ -14,10 +16,17 @@ import redis from 'redis';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({origin:'*'}));
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended: true}));
@@ -26,7 +35,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 <%- dbTemp %>
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "<%= path %>");
+  res.sendFile(path.join(__dirname, "<%= path %>"));
 });
 
 app.listen(PORT, () => {

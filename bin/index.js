@@ -99,7 +99,7 @@ argv.command({
 
         packages.push("express", "ejs", "dotenv", "cors", "body-parser");
         dependencies = await installPackages(packages);
-        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "/public/index.html", db: db, dbTemp: dbTemp});
+        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "public/index.html", db: db, dbTemp: dbTemp});
       } else if(argv._.length > 1) {
         //get all the arguments after the first ('create-node-app') argument to get all packages
         packages = argv._.slice(1);
