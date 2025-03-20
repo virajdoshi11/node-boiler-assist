@@ -6,7 +6,7 @@ node-boiler-assist is a cli tool that helps create boilerplate code files used i
 
 Either through cloning with git or by using [npm](http://npmjs.org) (the recommended way):
 ```bash
-npm install node-boiler-assist
+npm i -g node-boiler-assist
 ```
 
 # Usage
