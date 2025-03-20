@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-// add webpack
 import ejs from 'ejs';
 import { exec, execSync } from 'node:child_process'
 import chalk from 'chalk';
@@ -20,16 +19,10 @@ const cwd = process.cwd();
 
 import { createFile, createFolder, installPackages } from './utils.js';
 
-// const usage = "\nUsage: create-node-project <lang_name> sentence or words to be translated";
-// const options = argv
-// .usage(usage)
-// .option("l", {alias: "languages", describe: "List all languages supported", type: "boolean", demandOption: false})
-// .help(true).argv
-
 const questions = [{
   type: 'list',
   name: 'option',
-  message: 'Choose an option:',
+  message: 'Choose a database:',
   choices: [
     'MongoDB (mongoose)',
     'Firebase',
@@ -43,7 +36,7 @@ const dbMap = {
   "MongoDB (mongoose)": 'mongoose',
   "Firebase": 'firebase-admin',
   "PostgreSQL (pg)": 'pg',
-  "MySQL": 'mysql',
+  "MySQL": 'mysql2',
   "Redis": 'redis'
 }
 
@@ -71,7 +64,7 @@ argv.command({
 
     async function setup(jsonFile) {
       // no libraries are given, add default libraries
-      // TODO: First look for an existing package.json file, if the file doesn't exist then create the file
+      createFolder("", "public");
       if (argv._.length == 1) {
         console.log(chalk.yellow("Note: Predefined libraries will be added to the package.json"));
         
@@ -81,82 +74,92 @@ argv.command({
           packages.push(dbMap[answers.option]);
           db = answers.option;
         }).catch(err => {
-          console.log("There was an error");
+          console.log("There was an error loading the database:", err);
         });
 
         let dbTemp;
-        if(db == "MongoDB (mongoose)") {
-          dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mongoose.ejs'))
-        } else if(db == "Firebase") {
-          dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_firebase.ejs'))
-        } else if(db == "PostgreSQL (pg)") {
-          dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_postgre.ejs'))
-        } else if(db == "MySQL") {
-          dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mysql.ejs'))
-        } else {
-          dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_redis.ejs'))
+        createFolder("", "utils")
+        switch (db) {
+          case "MongoDB (mongoose)":
+            // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mongoose.ejs'))
+            renderTemplate(path.join(__dirname, "templates/_mongoose.ejs"), "./utils/", "connectDB.js")
+            break;
+          case "Firebase":
+            // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_firebase.ejs'))
+            renderTemplate(path.join(__dirname, "templates/_firebase.ejs"), "./utils/", "connectDB.js")
+            break;
+          case "PostgreSQL (pg)":
+            // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_postgre.ejs'))
+            renderTemplate(path.join(__dirname, "templates/_postgre.ejs"), "./utils/", "connectDB.js")
+            break;
+          case "MySQL":
+            // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mysql.ejs'))
+            renderTemplate(path.join(__dirname, "templates/_mysql.ejs"), "./utils/", "connectDB.js")
+            break;
+          default:
+            // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_redis.ejs'))
+            renderTemplate(path.join(__dirname, "templates/_redis.ejs"), "./utils/", "connectDB.js")
+            break;
         }
 
         packages.push("express", "ejs", "dotenv", "cors", "body-parser");
         dependencies = await installPackages(packages);
-        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "public/index.html", db: db, dbTemp: dbTemp});
+        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "public/index.html"});
+        createFolder("", "views");
+        createFolder("views/", "partials")
+        renderTemplate(path.join(__dirname, "templates/_indexejs.ejs"), "./views/", "index.ejs", "")
+        renderTemplate(path.join(__dirname, "templates/_header.ejs"), "./views/partials/", "header.ejs", "")
       } else if(argv._.length > 1) {
         //get all the arguments after the first ('create-node-app') argument to get all packages
         packages = argv._.slice(1);
         dependencies = await installPackages(packages);
-        createFile("", jsonFile.main || "index.js", "//This is the server file");
+        createFile("", jsonFile.main || "index.js", "//This is the entry point of your app");
+        
+        //if the user used "-y" then this folder should not be created since ejs will be used
+        createFolder("public/", "html");
+        renderTemplate(path.join(__dirname, "templates/_indexhtml.ejs"), "./public/html/", "index.html", jsonFile);
       }
-      createFolder("", "public");
-      renderTemplate(path.join(__dirname, "templates/_indexhtml.ejs"), "./public/", "index.html", jsonFile);
-      renderTemplate(path.join(__dirname, "templates/_styles.ejs"), "./public/", "styles.css", "");
-      renderTemplate(path.join(__dirname, "templates/_app.ejs"), "./public/", "app.js", "");
+      createFolder("public/", "css");
+      createFolder("public/", "js");
+      createFolder("public/", "images");
+      createFolder("public/", "fonts");
+      
+      renderTemplate(path.join(__dirname, "templates/_styles.ejs"), "./public/css/", "styles.css", "");
+      renderTemplate(path.join(__dirname, "templates/_app.ejs"), "./public/js/", "app.js", "");
     }
-    let jsonFile;
 
-    if(argv.y) {
-      // (await execa("npm init -y")).stdout;
-      execSync('npm init -y', {stdio: 'pipe'})
-    } else {
-      try {
-        const data = fs.readFileSync(path.join(cwd, 'package.json'));
-        if(data == '') {
-          execSync('npm init', {stdio: 'inherit'});
-        }
-      } catch (err) {
-        console.log("The file does not exists, creating it");
+    let jsonFile;
+    let packageJSON;
+
+    try {
+      //get the package.json file (if exists)
+      //ignore the '-y' flag if package.json already exists
+      packageJSON = fs.readFileSync(path.join(cwd, 'package.json'));
+    } catch(err) {
+      console.log(err);
+      console.log("Creating package.json file");
+      if(argv.y) {
+        execSync('npm init -y', {stdio: 'pipe'});
+      } else {
         execSync('npm init', {stdio: 'inherit'});
       }
+      console.log("The package.json file has been created");
+      packageJSON = fs.readFileSync(path.join(cwd, 'package.json'))
     }
-    console.log("The package.json file has been created");
-    jsonFile = JSON.parse(fs.readFileSync(path.join(cwd, "./package.json")))
-    jsonFile.type = "module";
-    jsonFile.scripts.start = `node ${jsonFile.main}`
-    
-    setup(jsonFile);
 
-    createFile('', ".env", "");
+    packageJSON.type = "module";
+    packageJSON.scripts.start = `node ${packageJSON.main}`
+    
+    setup(packageJSON);
+
+    // createFile('', ".env", "");
+    renderTemplate(path.join(__dirname, "templates/_env.ejs"), "./", ".env", {db: db});
     createFile('', '.gitignore', "node_modules\n.env");
   }
 }).argv
 
 // if(argv.argv._[0] == null){
 //   showHelp();
-// }
-
-// Wrote to /Users/nikhildoshi/Desktop/College/testNode/package.json:
-// 
-// 
-// {
-//   "name": "testnode",
-//   "version": "1.0.0",
-//   "description": "",
-//   "main": "index.js",
-//   "scripts": {
-//     "test": "echo \"Error: no test specified\" && exit 1"
-//   },
-//   "keywords": [],
-//   "author": "",
-//   "license": "ISC"
 // }
 
 // npm init is an interactive command that requires user input. When you run npm init programmatically, it doesn't work as expected because it's not designed to be used that way.

@@ -50,7 +50,6 @@ let dependecies = '';
 async function installPackages(pkgList) {
   let command = `npm install ${pkgList.join(" ")}`;
   await execa(command);
-  // console.log();
 }
 
 // https://stackoverflow.com/questions/56620487/force-javascript-node-to-wait-on-exec
@@ -77,3 +76,12 @@ async function getPackages(pkgList) {
 }
 
 export { showHelp, createFolder, createFile, getPackages, installPackages }
+
+
+/**
+ * assist create-node-app
+ * assist create-node-app -y (check if package.json exists. if it does then add default packages, if it doesnt
+ *    then add package.json and add those packages)
+ * assist create-node-app express ejs (if package.json doesn't exist then create it and add these packages)
+ * assist create-node-app -y express ejs (if package.json exist skip to installation)
+ */

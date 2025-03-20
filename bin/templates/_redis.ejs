@@ -1,7 +1,7 @@
-const client = redis.createClient({
-  host: 'localhost',
-  port: 6379,
-  password: 'your_redis_password'
+import { createClient } from 'redis';
+
+const client = createClient({
+  url: process.env.REDIS_URL || 'redis://localhost:6379'
 });
 
 client.connect((err) => {
@@ -11,5 +11,17 @@ client.connect((err) => {
     console.log('Connected to Redis!');
   }
 });
+
+export async function closeRedisConnection() {
+  try {
+    await client.quit();
+    console.log('Redis connection closed.');
+  } catch (error) {
+    console.error('Error closing Redis connection:', error);
+    throw error;
+  }
+}
+
+export client;
 
 // client.quit();

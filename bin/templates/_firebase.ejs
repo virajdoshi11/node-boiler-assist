@@ -1,7 +1,21 @@
-let serviceAccount = require("path/to/serviceAccountKey.json");
+import admin from 'firebase-admin';
+import serviceAccount from "./path/to/serviceAccountKey.json";
 
-admin.initializeApp({
+const fbAdmin = admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-const db = admin.database();
+export async function closeFirebaseConnection() {
+  try {
+      // Delete the Firebase app instance
+      await fbAdmin.delete();
+      console.log('Firebase app deleted.');
+  } catch (error) {
+      console.error('Error cleaning up Firebase:', error);
+      throw error;
+  }
+}
+
+export fbAdmin;
+export const db = admin.firestore();
+export const auth = admin.auth();

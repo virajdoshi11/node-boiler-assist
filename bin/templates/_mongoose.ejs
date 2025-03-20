@@ -1,11 +1,14 @@
-async function connectMongo() {
-  const username = 'your_username';
-  const password = 'your_password';
-  const clusterName = 'your_clusterName';
-  const dbName = 'dbName';
-  const db = 'db_name'
+require('dotenv').config();
+import mongoose from "mongoose"
 
-  const uri = `mongodb+srv://${username}:${password}@${clusterName}.mongodb.net/${dbName}?retryWrites=true&w=majority&appName=${db}`;
+export async function connectMongo() {
+  const username = 'process.env.MONGO_USERNAME';
+  const password = 'process.env.MONGO_PASSWORD';
+  const cluster = 'process.env.MONGO_CLUSTER_NAME';
+  const collection = 'process.env.MONGO_COLLECTION_NAME';
+  const db = 'process.env.MONGO_DB_NAME'
+
+  const uri = `mongodb+srv://${username}:${password}@${cluster}.mongodb.net/${collection}?retryWrites=true&w=majority&appName=${db}`;
   
   try {
     await mongoose.connect(uri)
@@ -18,4 +21,17 @@ async function connectMongo() {
   }
 }
 
-connectMongo()
+export async function closeMongoConnection() {
+  try {
+    // Check if the connection is open
+    if (mongoose.connection.readyState === 1) { // 1 = connected
+      await mongoose.connection.close();
+      console.log('MongoDB connection closed.');
+    } else {
+      console.log('MongoDB connection was not open.');
+    }
+  } catch (error) {
+    console.error('Error closing MongoDB connection:', error);
+    throw error;
+  }
+}

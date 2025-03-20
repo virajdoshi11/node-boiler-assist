@@ -1,21 +1,20 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
-<% if (db == "MongoDB (mongoose)") { %>
-import mongoose from 'mongoose';
-<% } else if(db == "Firebase") { %>
-import admin from 'firebase-admin';
-<% } else if(db == "PostgreSQL (pg)") { %>
-import { Client, Pool } from 'pg';
-<% } else if(db == "MySQL") { %>
-import mysql from "mysql";
-<% } else if(db == "Redis") { %>
-import redis from 'redis';
-<% } %>
 import bodyParser from 'body-parser';
 import cors from 'cors';
 
+<% if (db == "MongoDB (mongoose)") { %>
+import { connectMongo, closeMongoConnection } from './connectDB.js';
+<% } else if(db == "Firebase") { %>
+import { db, auth, closeFirebaseConnection } from "./connectDB.js";
+<% } else if(db == "MySQL") { %>
+import { pool, closeMySQLPool } from "./connectDB.js";
+<% } else if(db == "Redis") { %>
+import { client, closeRedisConnection } from "./connectDB.js";
+<% } else { %>
+import { query, closePool } from "./connectDB.js";
+<% } %>
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -27,12 +26,10 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(cors({origin:'*'}));
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(cors({origin:'*'}));
 app.use(bodyParser.urlencoded({extended: true}));
-
-// connecting to db
-<%- dbTemp %>
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "<%= path %>"));
@@ -41,3 +38,26 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log("Server started on port: " + PORT);
 })
+
+// Close the connection pool when the server shuts down
+async function shutDownServer() {
+  console.log("The server is shutting down");
+
+  // close the database connection
+  <% if(db == "MongoDB (mongoose)") { %>
+    closeMongoConnection();
+  <% } else if (db == "Firebase") { %>
+    closeFirebaseConnection();
+  <% } else if (db == "MySQL") { %>
+    closeMySQLPool();
+  <% } else if (db == "Redis") { %>
+    closeRedisConnection();
+  <% } else { %>
+    closePool();
+  <% } %>
+
+  process.exit(0);
+}
+
+process.on('SIGINT', shutDownServer);
+process.on('SIGTERM', shutDownServer);

@@ -1,0 +1,23 @@
+PORT=3000
+NODE_ENV="production"
+
+<% if (db == "MongoDB (mongoose)") { %>
+MONGO_USERNAME=""
+MONGO_PASSWORD=""
+MONGO_CLUSTER_NAME="" #default = Cluster0
+MONGO_COLLECTION_NAME=""
+MONGO_DB_NAME=""
+<% else if(db == "PostgreSQL (pg)") %>
+POSTGRES_USER="db_user"
+POSTGRES_PASSWORD="your_password"
+POSTGRES_HOST="127.0.0.1"
+POSTGRES_PORT=5432
+POSTGRES_DB="db_name"
+<% } else if(db == "MySQL") { %>
+MYSQL_HOST="localhost"
+MYSQL_USER="root"
+MYSQL_PASSWORD=""
+MYSQL_DATABASE=""
+<% } else if(db == "Redis") { %>
+REDIS_URL="" #redis://localhost:6379
+<% } %>
