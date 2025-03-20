@@ -1,6 +1,6 @@
 {
   "name": "node-boiler-assist",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "./bin/index.js",
   "bin": {

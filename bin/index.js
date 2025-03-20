@@ -52,7 +52,7 @@ argv.command({
   describe: 'Creates a basic node project with usual files',
   builder: {
     y: {
-      describe: "Use default values to build the package.json",
+      describe: "Using default values to build the package.json",
       demandOption: false
     }
   },
@@ -77,38 +77,37 @@ argv.command({
           console.log("There was an error loading the database:", err);
         });
 
-        let dbTemp;
         createFolder("", "utils")
         switch (db) {
           case "MongoDB (mongoose)":
             // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mongoose.ejs'))
-            renderTemplate(path.join(__dirname, "templates/_mongoose.ejs"), "./utils/", "connectDB.js")
+            renderTemplate(path.join(__dirname, "templates/_mongoose.js"), "./utils/", "connectDB.js")
             break;
           case "Firebase":
             // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_firebase.ejs'))
-            renderTemplate(path.join(__dirname, "templates/_firebase.ejs"), "./utils/", "connectDB.js")
+            renderTemplate(path.join(__dirname, "templates/_firebase.js"), "./utils/", "connectDB.js")
             break;
           case "PostgreSQL (pg)":
             // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_postgre.ejs'))
-            renderTemplate(path.join(__dirname, "templates/_postgre.ejs"), "./utils/", "connectDB.js")
+            renderTemplate(path.join(__dirname, "templates/_postgre.js"), "./utils/", "connectDB.js")
             break;
           case "MySQL":
             // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_mysql.ejs'))
-            renderTemplate(path.join(__dirname, "templates/_mysql.ejs"), "./utils/", "connectDB.js")
+            renderTemplate(path.join(__dirname, "templates/_mysql.js"), "./utils/", "connectDB.js")
             break;
           default:
             // dbTemp = await ejs.renderFile(path.join(__dirname, 'templates/_redis.ejs'))
-            renderTemplate(path.join(__dirname, "templates/_redis.ejs"), "./utils/", "connectDB.js")
+            renderTemplate(path.join(__dirname, "templates/_redis.js"), "./utils/", "connectDB.js")
             break;
         }
 
         packages.push("express", "ejs", "dotenv", "cors", "body-parser");
         dependencies = await installPackages(packages);
-        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "public/index.html"});
+        renderTemplate(path.join(__dirname, "templates/_index.ejs"), "", jsonFile.main || "index.js", {path: "public/index.html", db: db});
         createFolder("", "views");
         createFolder("views/", "partials")
-        renderTemplate(path.join(__dirname, "templates/_indexejs.ejs"), "./views/", "index.ejs", "")
-        renderTemplate(path.join(__dirname, "templates/_header.ejs"), "./views/partials/", "header.ejs", "")
+        renderTemplate(path.join(__dirname, "templates/_index.html"), "./views/", "index.ejs", "")
+        renderTemplate(path.join(__dirname, "templates/_header.ejs"), "./views/partials/", "header.ejs", {jsonFile: jsonFile})
       } else if(argv._.length > 1) {
         //get all the arguments after the first ('create-node-app') argument to get all packages
         packages = argv._.slice(1);
@@ -124,8 +123,8 @@ argv.command({
       createFolder("public/", "images");
       createFolder("public/", "fonts");
       
-      renderTemplate(path.join(__dirname, "templates/_styles.ejs"), "./public/css/", "styles.css", "");
-      renderTemplate(path.join(__dirname, "templates/_app.ejs"), "./public/js/", "app.js", "");
+      renderTemplate(path.join(__dirname, "templates/_styles.css"), "./public/css/", "styles.css", "");
+      renderTemplate(path.join(__dirname, "templates/_app.js"), "./public/js/", "app.js", "");
     }
 
     let jsonFile;
@@ -136,21 +135,22 @@ argv.command({
       //ignore the '-y' flag if package.json already exists
       packageJSON = fs.readFileSync(path.join(cwd, 'package.json'));
     } catch(err) {
-      console.log(err);
-      console.log("Creating package.json file");
+      console.log(chalk.yellow("No package.json file detected, creating a new package.json file"));
       if(argv.y) {
         execSync('npm init -y', {stdio: 'pipe'});
       } else {
         execSync('npm init', {stdio: 'inherit'});
       }
-      console.log("The package.json file has been created");
+      console.log(chalk.green("The package.json file has been created"));
       packageJSON = fs.readFileSync(path.join(cwd, 'package.json'))
     }
 
+    packageJSON = JSON.parse(packageJSON)
+
     packageJSON.type = "module";
-    packageJSON.scripts.start = `node ${packageJSON.main}`
+    packageJSON.scripts["start"] = `node ${packageJSON.main}`
     
-    setup(packageJSON);
+    await setup(packageJSON);
 
     // createFile('', ".env", "");
     renderTemplate(path.join(__dirname, "templates/_env.ejs"), "./", ".env", {db: db});

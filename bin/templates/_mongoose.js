@@ -2,11 +2,11 @@ require('dotenv').config();
 import mongoose from "mongoose"
 
 export async function connectMongo() {
-  const username = 'process.env.MONGO_USERNAME';
-  const password = 'process.env.MONGO_PASSWORD';
-  const cluster = 'process.env.MONGO_CLUSTER_NAME';
-  const collection = 'process.env.MONGO_COLLECTION_NAME';
-  const db = 'process.env.MONGO_DB_NAME'
+  const username = process.env.MONGO_USERNAME;
+  const password = process.env.MONGO_PASSWORD;
+  const cluster = process.env.MONGO_CLUSTER_NAME || "Cluster0";
+  const collection = process.env.MONGO_COLLECTION_NAME;
+  const db = process.env.MONGO_DB_NAME;
 
   const uri = `mongodb+srv://${username}:${password}@${cluster}.mongodb.net/${collection}?retryWrites=true&w=majority&appName=${db}`;
   

@@ -19,6 +19,6 @@ export async function closeMySQLPool() {
     throw error;
   }
 }
-<!-- process.on('exit', () => {
-  pool.end();
-}); -->
+// <!-- process.on('exit', () => {
+//   pool.end();
+// }); -->

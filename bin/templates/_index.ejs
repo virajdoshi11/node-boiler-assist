@@ -3,7 +3,8 @@ import express from 'express';
 import path from 'path';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 <% if (db == "MongoDB (mongoose)") { %>
 import { connectMongo, closeMongoConnection } from './connectDB.js';
 <% } else if(db == "Firebase") { %>
@@ -11,13 +12,10 @@ import { db, auth, closeFirebaseConnection } from "./connectDB.js";
 <% } else if(db == "MySQL") { %>
 import { pool, closeMySQLPool } from "./connectDB.js";
 <% } else if(db == "Redis") { %>
-import { client, closeRedisConnection } from "./connectDB.js";
+import { client, connectRedisClient, closeRedisConnection } from "./connectDB.js";
 <% } else { %>
 import { query, closePool } from "./connectDB.js";
 <% } %>
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -45,17 +43,16 @@ async function shutDownServer() {
 
   // close the database connection
   <% if(db == "MongoDB (mongoose)") { %>
-    closeMongoConnection();
+  closeMongoConnection();
   <% } else if (db == "Firebase") { %>
-    closeFirebaseConnection();
+  closeFirebaseConnection();
   <% } else if (db == "MySQL") { %>
-    closeMySQLPool();
+  closeMySQLPool();
   <% } else if (db == "Redis") { %>
-    closeRedisConnection();
+  closeRedisConnection();
   <% } else { %>
-    closePool();
+  closePool();
   <% } %>
-
   process.exit(0);
 }
 

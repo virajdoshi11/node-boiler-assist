@@ -1,16 +1,18 @@
 import { createClient } from 'redis';
 
-const client = createClient({
+export const client = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379'
 });
 
-client.connect((err) => {
-  if (err) {
-    console.error('Error connecting to Redis:', err);
-  } else {
-    console.log('Connected to Redis!');
-  }
-});
+export function connectRedisClient() {
+  client.connect((err) => {
+    if (err) {
+      console.error('Error connecting to Redis:', err);
+    } else {
+      console.log('Connected to Redis!');
+    }
+  });
+}
 
 export async function closeRedisConnection() {
   try {
@@ -21,7 +23,5 @@ export async function closeRedisConnection() {
     throw error;
   }
 }
-
-export client;
 
 // client.quit();
